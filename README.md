@@ -1,73 +1,52 @@
-# Welcome to your Lovable project
+# MacroMentor
 
-## Project info
+MacroMentor is a Progressive Web App (PWA) that democratizes personalized nutrition and fitness planning through AI-powered recommendations. The app provides budget-friendly, customized meal plans and simple fitness routines based on individual user profiles, health conditions, and dietary preferences.
 
-**URL**: https://lovable.dev/projects/bf270305-e2fe-41d4-9f58-6c1dc58a03fa
+## 🎯 Project Status
 
-## How can I edit this code?
+**Current Phase**: Phase 4 Complete - Frontend Foundations
+**Next Phase**: Phase 5 - Core Feature Development
 
-There are several ways of editing your application.
+See [docs/IMPLEMENTATION_STATUS.md](./docs/IMPLEMENTATION_STATUS.md) for detailed progress.
 
-**Use Lovable**
+## 🚀 Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/bf270305-e2fe-41d4-9f58-6c1dc58a03fa) and start prompting.
+### ✅ Completed Features
+- **User Authentication**: Email/password sign up and sign in with Supabase Auth
+- **Profile Onboarding**: 4-step wizard collecting user info, goals, health conditions, and dietary preferences
+- **Design System**: Health-focused UI with semantic color tokens (Fresh Green, Deep Blue, Warm Orange)
+- **Secure Database**: 13 tables with Row-Level Security (RLS) policies
+- **Responsive Design**: Mobile-first layout with touch-friendly interfaces
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🚧 In Development
+- AI-powered nutrition calculator
+- Personalized meal planning with GPT-4
+- Customized workout routines
+- Progress tracking with analytics
+- AI chat assistant
 
-**Use your preferred IDE**
+## 🛠 Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React 18 + Vite + TypeScript + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **UI Components**: Shadcn UI (Radix primitives)
+- **Forms**: React Hook Form + Zod validation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📁 Key Documentation
 
-Follow these steps:
+- [Planning Document](./docs/PHASE1_PLANNING.md) - Complete requirements and user stories
+- [Design System](./docs/DESIGN_SYSTEM.md) - UI/UX guidelines and color system
+- [Implementation Status](./docs/IMPLEMENTATION_STATUS.md) - Current progress and next steps
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚦 Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Important**: Before testing auth, configure Site URL and Redirect URLs in Supabase dashboard under Authentication > URL Configuration.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Project Info
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/bf270305-e2fe-41d4-9f58-6c1dc58a03fa) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**URL**: https://lovable.dev/projects/bf270305-e2fe-41d4-9f58-6c1dc58a03fa
