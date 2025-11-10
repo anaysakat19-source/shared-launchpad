@@ -10,6 +10,10 @@ import Goals from "./pages/onboarding/Goals";
 import HealthConditions from "./pages/onboarding/HealthConditions";
 import DietaryPreferences from "./pages/onboarding/DietaryPreferences";
 import Dashboard from "./pages/Dashboard";
+import Meals from "./pages/Meals";
+import Workout from "./pages/Workout";
+import Progress from "./pages/Progress";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +32,10 @@ const App = () => (
           <Route path="/onboarding/health" element={<HealthConditions />} />
           <Route path="/onboarding/diet" element={<DietaryPreferences />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/meals" element={<Meals />} />
+          <Route path="/workout" element={<Workout />} />
+          <Route path="/progress" element={<Progress />} />
+          <Route path="/chat" element={<Chat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

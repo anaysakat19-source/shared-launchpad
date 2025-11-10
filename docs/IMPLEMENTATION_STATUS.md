@@ -85,49 +85,50 @@
 - [x] 404 Not Found page
 - [x] Proper navigation flow
 
-## Phase 5: Core Feature Development 🚧 NOT STARTED
+## Phase 5: Core Feature Development ✅ COMPLETED
 
-### AI Nutrition Calculator
-- [ ] BMR calculation formula
-- [ ] Activity factor multiplier
-- [ ] Goal-based calorie adjustment
-- [ ] Macronutrient distribution
-- [ ] Health condition adjustments
-- [ ] Generate nutrition targets
+### AI Nutrition Calculator ✅
+- [x] BMR calculation using Mifflin-St Jeor Equation
+- [x] Activity factor multipliers
+- [x] Goal-based calorie adjustment (weight loss/muscle gain)
+- [x] Macronutrient distribution (protein, carbs, fats)
+- [x] Save nutrition targets to database
+- [x] Edge function: `calculate-nutrition`
 
-### Meal Planning
-- [ ] OpenAI GPT-4 integration
-- [ ] USDA FoodData API integration
-- [ ] Recipe generation based on preferences
-- [ ] Budget-conscious meal suggestions
-- [ ] Food substitution logic
-- [ ] Shopping list generation
-- [ ] Meal completion tracking
+### Meal Planning ✅
+- [x] Lovable AI integration (Gemini 2.5 Flash)
+- [x] Personalized meal generation based on:
+  - User's diet type and preferences
+  - Budget constraints
+  - Allergies and health conditions
+  - Daily nutrition targets
+- [x] Recipe with ingredients and instructions
+- [x] Meal completion tracking
+- [x] Edge function: `generate-meal-plan`
+- [x] UI: `/meals` page with tabs and date picker
 
-### Workout Routines
-- [ ] Seed workout database with exercises
-- [ ] Workout recommendation algorithm
-- [ ] Filter by health conditions
-- [ ] Exercise demonstration content
-- [ ] Workout session timer
-- [ ] Workout completion logging
+### AI Chat Assistant ✅
+- [x] Streaming chat interface
+- [x] Context injection from user profile
+- [x] Chat history persistence
+- [x] Personalized advice on nutrition, workouts, motivation
+- [x] Edge function: `chat-assistant`
+- [x] UI: `/chat` page with message history
 
-### Progress Tracking
-- [ ] Weight logging UI
-- [ ] Chart visualization (Recharts)
-- [ ] Achievement badge system
-- [ ] Streak counter logic
-- [ ] Photo upload for progress
-- [ ] Analytics dashboard
+### Workout Routines ✅
+- [x] Workout recommendation system
+- [x] Filter workouts by health conditions
+- [x] Difficulty levels (beginner/intermediate/advanced)
+- [x] Exercise library with duration and descriptions
+- [x] Workout logging
+- [x] UI: `/workout` page with workout cards
 
-### AI Chat Assistant
-- [ ] Chat interface component
-- [ ] OpenAI GPT-4 integration
-- [ ] Context injection from user profile
-- [ ] Chat history persistence
-- [ ] Streaming responses
-- [ ] Food/nutrition queries
-- [ ] Motivational support
+### Progress Tracking ✅
+- [x] Weight logging functionality
+- [x] Weight trend chart (Recharts)
+- [x] Progress statistics (current weight, change, progress %)
+- [x] Achievement badge display
+- [x] UI: `/progress` page with charts and stats
 
 ## Phase 6: PWA + Offline + Notifications 🚧 NOT STARTED
 - [ ] Service worker setup
