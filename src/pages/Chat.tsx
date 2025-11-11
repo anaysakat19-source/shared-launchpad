@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Send, Loader2, MessageCircle } from 'lucide-react';
+import BottomNav from '@/components/BottomNav';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -121,18 +122,19 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <div className="border-b p-4">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold">AI Assistant</h1>
+    <>
+      <div className="flex flex-col h-screen bg-background pb-16">
+        <div className="border-b p-4">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">AI Assistant</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Ask me anything about nutrition, fitness, and healthy living!
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          Ask me anything about nutrition, fitness, and healthy living!
-        </p>
-      </div>
 
-      <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 p-4">
         <div className="max-w-2xl mx-auto space-y-4">
           {messages.length === 0 && (
             <Card className="p-6 text-center">
@@ -192,6 +194,8 @@ export default function Chat() {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+      <BottomNav />
+    </>
   );
 }

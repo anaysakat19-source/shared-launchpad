@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { TrendingDown, TrendingUp, Weight, Trophy, Calendar } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
+import BottomNav from '@/components/BottomNav';
 
 export default function Progress() {
   const navigate = useNavigate();
@@ -105,8 +106,9 @@ export default function Progress() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-20">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <>
+      <div className="min-h-screen bg-background p-4 pb-20">
+        <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold">Progress Tracking</h1>
 
         {/* Weight Stats */}
@@ -225,7 +227,9 @@ export default function Progress() {
             </p>
           )}
         </Card>
+        </div>
       </div>
-    </div>
+      <BottomNav />
+    </>
   );
 }

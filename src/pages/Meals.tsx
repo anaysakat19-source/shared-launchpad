@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Calendar, Loader2, Utensils, ChefHat } from 'lucide-react';
 import { format } from 'date-fns';
+import BottomNav from '@/components/BottomNav';
 
 export default function Meals() {
   const navigate = useNavigate();
@@ -174,8 +175,9 @@ export default function Meals() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-20">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <>
+      <div className="min-h-screen bg-background p-4 pb-20">
+        <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Meal Planning</h1>
           <Button variant="outline" size="icon">
@@ -225,7 +227,9 @@ export default function Meals() {
             </TabsContent>
           </Tabs>
         )}
+        </div>
       </div>
-    </div>
+      <BottomNav />
+    </>
   );
 }

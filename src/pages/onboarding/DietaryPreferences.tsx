@@ -50,41 +50,60 @@ const DietaryPreferences = () => {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to continue",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to continue",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
 
-    const { error } = await supabase
-      .from("dietary_preferences")
-      .insert({
-        user_id: user.id,
-        diet_type: data.dietType,
-        budget_range: data.budgetRange,
-        allergies: data.allergies || [],
-      });
+      const { error } = await supabase
+        .from("dietary_preferences")
+        .insert({
+          user_id: user.id,
+          diet_type: data.dietType,
+          budget_range: data.budgetRange,
+          allergies: data.allergies || [],
+        });
 
-    setLoading(false);
+      if (error) throw error;
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
+      // Calculate nutrition targets
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-nutrition`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      } catch (nutritionError) {
+        console.error('Error calculating nutrition:', nutritionError);
+      }
+
       toast({
         title: "Success!",
         description: "Your profile is now complete!",
       });
       navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,9 +184,9 @@ const DietaryPreferences = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">Low ($50-100/week)</SelectItem>
-                        <SelectItem value="moderate">Moderate ($100-200/week)</SelectItem>
-                        <SelectItem value="high">High ($200+/week)</SelectItem>
+                        <SelectItem value="low">Low (₹1,000 - ₹3,000/month)</SelectItem>
+                        <SelectItem value="moderate">Moderate (₹2,000 - ₹7,000/month)</SelectItem>
+                        <SelectItem value="high">High (₹5,000 - ₹20,000/month)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
