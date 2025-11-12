@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from "@supabase/supabase-js";
 import BottomNav from "@/components/BottomNav";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -12,6 +18,16 @@ const Dashboard = () => {
   const [nutritionTargets, setNutritionTargets] = useState<any>(null);
   const [todayMeals, setTodayMeals] = useState<any[]>([]);
   const [recentWorkouts, setRecentWorkouts] = useState<any[]>([]);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    first_name: '',
+    last_name: '',
+    age: '',
+    gender: '',
+    height_cm: '',
+    weight_kg: '',
+    activity_level: '',
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +49,17 @@ const Dashboard = () => {
       .eq("id", userId)
       .single();
     setProfile(data);
+    if (data) {
+      setEditForm({
+        first_name: data.first_name || '',
+        last_name: data.last_name || '',
+        age: data.age?.toString() || '',
+        gender: data.gender || '',
+        height_cm: data.height_cm?.toString() || '',
+        weight_kg: data.weight_kg?.toString() || '',
+        activity_level: data.activity_level || '',
+      });
+    }
   };
 
   const loadDashboardData = async (userId: string) => {
@@ -67,6 +94,33 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: editForm.first_name,
+          last_name: editForm.last_name,
+          age: parseInt(editForm.age),
+          gender: editForm.gender,
+          height_cm: parseFloat(editForm.height_cm),
+          weight_kg: parseFloat(editForm.weight_kg),
+          activity_level: editForm.activity_level as any,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Profile updated successfully!');
+      setEditDialogOpen(false);
+      loadProfile(user.id);
+    } catch (error: any) {
+      toast.error('Error updating profile: ' + error.message);
+    }
   };
 
   if (!user || !profile) {
@@ -141,12 +195,116 @@ const Dashboard = () => {
             {/* Profile Summary Card */}
             <Card>
               <CardHeader>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>Your basic information</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle>Profile</CardTitle>
+                    <CardDescription>Your basic information</CardDescription>
+                  </div>
+                  <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Edit Profile</DialogTitle>
+                        <DialogDescription>Update your personal information</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="first_name">First Name</Label>
+                            <Input
+                              id="first_name"
+                              value={editForm.first_name}
+                              onChange={(e) => setEditForm({...editForm, first_name: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="last_name">Last Name</Label>
+                            <Input
+                              id="last_name"
+                              value={editForm.last_name}
+                              onChange={(e) => setEditForm({...editForm, last_name: e.target.value})}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="age">Age</Label>
+                          <Input
+                            id="age"
+                            type="number"
+                            value={editForm.age}
+                            onChange={(e) => setEditForm({...editForm, age: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="gender">Gender</Label>
+                          <Select value={editForm.gender} onValueChange={(value) => setEditForm({...editForm, gender: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="male">Male</SelectItem>
+                              <SelectItem value="female">Female</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="height">Height (cm)</Label>
+                          <Input
+                            id="height"
+                            type="number"
+                            value={editForm.height_cm}
+                            onChange={(e) => setEditForm({...editForm, height_cm: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="weight">Weight (kg)</Label>
+                          <Input
+                            id="weight"
+                            type="number"
+                            step="0.1"
+                            value={editForm.weight_kg}
+                            onChange={(e) => setEditForm({...editForm, weight_kg: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="activity">Activity Level</Label>
+                          <Select value={editForm.activity_level} onValueChange={(value) => setEditForm({...editForm, activity_level: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select activity level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sedentary">Sedentary</SelectItem>
+                              <SelectItem value="lightly_active">Lightly Active</SelectItem>
+                              <SelectItem value="moderately_active">Moderately Active</SelectItem>
+                              <SelectItem value="very_active">Very Active</SelectItem>
+                              <SelectItem value="extremely_active">Extremely Active</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <Button onClick={handleUpdateProfile} className="w-full">
+                          Save Changes
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
+                  <p><strong>Name:</strong> {profile.first_name} {profile.last_name}</p>
                   <p><strong>Age:</strong> {profile.age}</p>
+                  <p><strong>Gender:</strong> {profile.gender}</p>
                   <p><strong>Height:</strong> {profile.height_cm} cm</p>
                   <p><strong>Weight:</strong> {profile.weight_kg} kg</p>
                   <p><strong>Activity:</strong> {profile.activity_level?.replace(/_/g, ' ')}</p>
