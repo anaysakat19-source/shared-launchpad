@@ -65,7 +65,7 @@ export default function Chat() {
       const { data: { session } } = await supabase.auth.getSession();
       
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`,
+        'https://ktnzaoxjogmvqqnsqufo.supabase.co/functions/v1/chat-assistant',
         {
           method: 'POST',
           headers: {

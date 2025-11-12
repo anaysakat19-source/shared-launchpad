@@ -30,7 +30,7 @@ const Auth = () => {
         
         // Redirect authenticated users
         if (session?.user) {
-          navigate("/onboarding/basic");
+          navigate("/dashboard");
         }
       }
     );
@@ -41,7 +41,7 @@ const Auth = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        navigate("/onboarding/basic");
+        navigate("/dashboard");
       }
     });
 
@@ -52,7 +52,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    const redirectUrl = `${window.location.origin}/onboarding/basic`;
+    const redirectUrl = `${window.location.origin}/dashboard`;
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -100,7 +100,7 @@ const Auth = () => {
         title: "Welcome back!",
         description: "Signed in successfully.",
       });
-      navigate("/onboarding/basic");
+      navigate("/dashboard");
     }
   };
 
