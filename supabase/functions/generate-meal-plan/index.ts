@@ -1,11 +1,20 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  mealType: z.enum(['breakfast', 'lunch', 'dinner', 'snack'], {
+    errorMap: () => ({ message: 'Meal type must be breakfast, lunch, dinner, or snack' })
+  }),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,6 +22,48 @@ serve(async (req) => {
   }
 
   try {
+    // Parse and validate request body
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validationResult = requestSchema.safeParse(body);
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({ error: validationResult.error.errors[0].message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { date, mealType } = validationResult.data;
+
+    // Validate date is within reasonable range (today to 30 days in future)
+    const requestDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxFuture = new Date();
+    maxFuture.setDate(maxFuture.getDate() + 30);
+
+    if (requestDate < today) {
+      return new Response(
+        JSON.stringify({ error: 'Date cannot be in the past' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (requestDate > maxFuture) {
+      return new Response(
+        JSON.stringify({ error: 'Date cannot be more than 30 days in the future' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -25,8 +76,6 @@ serve(async (req) => {
 
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) throw new Error('Not authenticated');
-
-    const { date, mealType } = await req.json();
 
     // Get user data
     const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();

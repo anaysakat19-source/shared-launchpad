@@ -45,6 +45,27 @@ serve(async (req) => {
       throw new Error('Profile or goals not found');
     }
 
+    // Validate profile data before calculations
+    if (!profile.weight_kg || !profile.height_cm || !profile.age) {
+      throw new Error('Profile is incomplete. Please update your weight, height, and age.');
+    }
+
+    if (profile.weight_kg <= 0 || profile.weight_kg > 500) {
+      throw new Error('Invalid weight value. Please update your profile.');
+    }
+
+    if (profile.height_cm <= 0 || profile.height_cm > 300) {
+      throw new Error('Invalid height value. Please update your profile.');
+    }
+
+    if (profile.age <= 0 || profile.age > 150) {
+      throw new Error('Invalid age value. Please update your profile.');
+    }
+
+    if (!profile.gender || !['male', 'female', 'other'].includes(profile.gender)) {
+      throw new Error('Invalid gender value. Please update your profile.');
+    }
+
     // Calculate BMR using Mifflin-St Jeor Equation
     let bmr: number;
     if (profile.gender === 'male') {
