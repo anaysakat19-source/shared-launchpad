@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Pencil } from "lucide-react";
+import { Pencil, Watch } from "lucide-react";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -374,6 +374,24 @@ const Dashboard = () => {
                     <Button size="sm" onClick={() => navigate('/workout')}>Start Workout</Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Connect Wearable Card */}
+            <Card className="col-span-full">
+              <CardContent className="flex items-center justify-between py-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <Watch className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Connect a Wearable</p>
+                    <p className="text-sm text-muted-foreground">Sync your smartwatch, ring, or fitness band</p>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={() => navigate('/wearables')}>
+                  Connect
+                </Button>
               </CardContent>
             </Card>
           </div>
