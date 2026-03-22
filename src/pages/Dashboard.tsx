@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { User } from "@supabase/supabase-js";
 import BottomNav from "@/components/BottomNav";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Pencil, Watch } from "lucide-react";
+import EditProfileDialog from "@/components/dashboard/EditProfileDialog";
+import {
+  Flame, Utensils, Dumbbell, TrendingUp, Watch, ChevronRight,
+  LogOut, Droplets, Zap, Target, MessageCircle, UserRound,
+} from "lucide-react";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -18,16 +18,6 @@ const Dashboard = () => {
   const [nutritionTargets, setNutritionTargets] = useState<any>(null);
   const [todayMeals, setTodayMeals] = useState<any[]>([]);
   const [recentWorkouts, setRecentWorkouts] = useState<any[]>([]);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editForm, setEditForm] = useState({
-    first_name: '',
-    last_name: '',
-    age: '',
-    gender: '',
-    height_cm: '',
-    weight_kg: '',
-    activity_level: '',
-  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,52 +33,19 @@ const Dashboard = () => {
   }, [navigate]);
 
   const loadProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
     setProfile(data);
-    if (data) {
-      setEditForm({
-        first_name: data.first_name || '',
-        last_name: data.last_name || '',
-        age: data.age?.toString() || '',
-        gender: data.gender || '',
-        height_cm: data.height_cm?.toString() || '',
-        weight_kg: data.weight_kg?.toString() || '',
-        activity_level: data.activity_level || '',
-      });
-    }
   };
 
   const loadDashboardData = async (userId: string) => {
-    // Load nutrition targets
-    const { data: targets } = await supabase
-      .from('nutrition_targets')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .single();
-    setNutritionTargets(targets);
-
-    // Load today's meals
-    const today = new Date().toISOString().split('T')[0];
-    const { data: meals } = await supabase
-      .from('meal_plans')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', today);
-    setTodayMeals(meals || []);
-
-    // Load recent workout logs
-    const { data: workouts } = await supabase
-      .from('workout_logs')
-      .select('*, workouts(*)')
-      .eq('user_id', userId)
-      .order('completed_at', { ascending: false })
-      .limit(3);
-    setRecentWorkouts(workouts || []);
+    const [targetsRes, mealsRes, workoutsRes] = await Promise.all([
+      supabase.from('nutrition_targets').select('*').eq('user_id', userId).eq('is_active', true).single(),
+      supabase.from('meal_plans').select('*').eq('user_id', userId).eq('date', new Date().toISOString().split('T')[0]),
+      supabase.from('workout_logs').select('*, workouts(*)').eq('user_id', userId).order('completed_at', { ascending: false }).limit(5),
+    ]);
+    setNutritionTargets(targetsRes.data);
+    setTodayMeals(mealsRes.data || []);
+    setRecentWorkouts(workoutsRes.data || []);
   };
 
   const handleSignOut = async () => {
@@ -96,302 +53,221 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const handleUpdateProfile = async () => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: editForm.first_name,
-          last_name: editForm.last_name,
-          age: parseInt(editForm.age),
-          gender: editForm.gender,
-          height_cm: parseFloat(editForm.height_cm),
-          weight_kg: parseFloat(editForm.weight_kg),
-          activity_level: editForm.activity_level as any,
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast.success('Profile updated successfully!');
-      setEditDialogOpen(false);
-      loadProfile(user.id);
-    } catch (error: any) {
-      toast.error('Error updating profile: ' + error.message);
-    }
-  };
-
   if (!user || !profile) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   const completedMeals = todayMeals.filter(m => m.is_completed).length;
-  const totalCalories = todayMeals
-    .filter(m => m.is_completed)
-    .reduce((sum, m) => sum + (m.calories || 0), 0);
+  const totalCalories = todayMeals.filter(m => m.is_completed).reduce((s, m) => s + (m.calories || 0), 0);
+  const calorieTarget = nutritionTargets?.daily_calories || 0;
+  const caloriePct = calorieTarget > 0 ? Math.min((totalCalories / calorieTarget) * 100, 100) : 0;
+  const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-background to-primary/5 pb-20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-4xl font-bold">Welcome back, {profile.first_name}!</h1>
-              <p className="text-muted-foreground mt-2">Your personalized dashboard</p>
+      <div className="min-h-screen bg-background pb-24">
+        {/* Hero Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground px-5 pt-10 pb-16 rounded-b-[2rem]">
+          {/* Decorative circles */}
+          <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-white/5" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/5" />
+
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-primary-foreground/70 text-sm font-medium">{greeting}</p>
+                <h1 className="text-3xl font-bold mt-1 tracking-tight">
+                  {profile.first_name} {profile.last_name?.charAt(0)}.
+                </h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <EditProfileDialog userId={user.id} profile={profile} onSaved={() => loadProfile(user.id)} />
+                <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-            <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
+
+            {/* Calorie Ring Card — floating */}
+            <Card className="bg-card/95 backdrop-blur-lg border-0 shadow-xl -mb-20 relative z-20">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-5">
+                  {/* SVG Ring */}
+                  <div className="relative w-24 h-24 flex-shrink-0">
+                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                      <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-muted" />
+                      <circle
+                        cx="50" cy="50" r="42" fill="none" strokeWidth="8"
+                        strokeLinecap="round" className="stroke-primary transition-all duration-700"
+                        strokeDasharray={`${caloriePct * 2.64} 264`}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-lg font-bold text-foreground">{totalCalories}</span>
+                      <span className="text-[10px] text-muted-foreground">kcal</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                      <span>Daily Goal</span>
+                      <span className="font-semibold text-foreground">{calorieTarget} kcal</span>
+                    </div>
+                    {nutritionTargets && (
+                      <div className="grid grid-cols-3 gap-2">
+                        <MacroPill label="Protein" value={`${nutritionTargets.protein_grams}g`} color="bg-primary/15 text-primary" />
+                        <MacroPill label="Carbs" value={`${nutritionTargets.carbs_grams}g`} color="bg-accent/15 text-accent" />
+                        <MacroPill label="Fats" value={`${nutritionTargets.fats_grams}g`} color="bg-secondary/15 text-secondary" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Main content — offset for the floating card */}
+        <div className="max-w-4xl mx-auto px-5 pt-24 space-y-5">
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-4 gap-3">
+            <QuickAction icon={<Utensils className="w-5 h-5" />} label="Meals" onClick={() => navigate('/meals')} color="bg-primary/10 text-primary" />
+            <QuickAction icon={<Dumbbell className="w-5 h-5" />} label="Workout" onClick={() => navigate('/workout')} color="bg-accent/10 text-accent" />
+            <QuickAction icon={<TrendingUp className="w-5 h-5" />} label="Progress" onClick={() => navigate('/progress')} color="bg-secondary/10 text-secondary" />
+            <QuickAction icon={<MessageCircle className="w-5 h-5" />} label="AI Chat" onClick={() => navigate('/chat')} color="bg-warning/10 text-warning" />
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Daily Nutrition Card */}
-            <Card className="col-span-full lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Today's Nutrition</CardTitle>
-                <CardDescription>Track your daily calorie and macro goals</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {nutritionTargets ? (
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium">Calories</span>
-                        <span className="text-sm text-muted-foreground">
-                          {totalCalories} / {nutritionTargets.daily_calories}
-                        </span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all"
-                          style={{ width: `${Math.min((totalCalories / nutritionTargets.daily_calories) * 100, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div>
-                        <p className="text-2xl font-bold text-primary">{nutritionTargets.protein_grams}g</p>
-                        <p className="text-xs text-muted-foreground">Protein</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-accent">{nutritionTargets.carbs_grams}g</p>
-                        <p className="text-xs text-muted-foreground">Carbs</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-secondary">{nutritionTargets.fats_grams}g</p>
-                        <p className="text-xs text-muted-foreground">Fats</p>
-                      </div>
-                    </div>
+          {/* Today's Meals */}
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <Utensils className="w-4 h-4 text-primary" />
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">No nutrition targets set yet</p>
-                    <Button onClick={() => navigate('/meals')}>Get Started</Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Profile Summary Card */}
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>Profile</CardTitle>
-                    <CardDescription>Your basic information</CardDescription>
-                  </div>
-                  <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Edit Profile</DialogTitle>
-                        <DialogDescription>Update your personal information</DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="first_name">First Name</Label>
-                            <Input
-                              id="first_name"
-                              value={editForm.first_name}
-                              onChange={(e) => setEditForm({...editForm, first_name: e.target.value})}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="last_name">Last Name</Label>
-                            <Input
-                              id="last_name"
-                              value={editForm.last_name}
-                              onChange={(e) => setEditForm({...editForm, last_name: e.target.value})}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="age">Age</Label>
-                          <Input
-                            id="age"
-                            type="number"
-                            value={editForm.age}
-                            onChange={(e) => setEditForm({...editForm, age: e.target.value})}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="gender">Gender</Label>
-                          <Select value={editForm.gender} onValueChange={(value) => setEditForm({...editForm, gender: value})}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select gender" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="female">Female</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="height">Height (cm)</Label>
-                          <Input
-                            id="height"
-                            type="number"
-                            value={editForm.height_cm}
-                            onChange={(e) => setEditForm({...editForm, height_cm: e.target.value})}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="weight">Weight (kg)</Label>
-                          <Input
-                            id="weight"
-                            type="number"
-                            step="0.1"
-                            value={editForm.weight_kg}
-                            onChange={(e) => setEditForm({...editForm, weight_kg: e.target.value})}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="activity">Activity Level</Label>
-                          <Select value={editForm.activity_level} onValueChange={(value) => setEditForm({...editForm, activity_level: value})}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select activity level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="sedentary">Sedentary</SelectItem>
-                              <SelectItem value="lightly_active">Lightly Active</SelectItem>
-                              <SelectItem value="moderately_active">Moderately Active</SelectItem>
-                              <SelectItem value="very_active">Very Active</SelectItem>
-                              <SelectItem value="extremely_active">Extremely Active</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <Button onClick={handleUpdateProfile} className="w-full">
-                          Save Changes
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <h3 className="font-semibold text-sm">Today's Meals</h3>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p><strong>Name:</strong> {profile.first_name} {profile.last_name}</p>
-                  <p><strong>Age:</strong> {profile.age}</p>
-                  <p><strong>Gender:</strong> {profile.gender}</p>
-                  <p><strong>Height:</strong> {profile.height_cm} cm</p>
-                  <p><strong>Weight:</strong> {profile.weight_kg} kg</p>
-                  <p><strong>Activity:</strong> {profile.activity_level?.replace(/_/g, ' ')}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Today's Meals Card */}
-            <Card className="col-span-full md:col-span-1">
-              <CardHeader>
-                <CardTitle>Today's Meals</CardTitle>
-                <CardDescription>Completed: {completedMeals}/{todayMeals.length}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {todayMeals.length > 0 ? (
-                  <div className="space-y-2">
-                    {todayMeals.map((meal) => (
-                      <div key={meal.id} className="flex items-center justify-between">
-                        <span className="text-sm capitalize">{meal.meal_type}</span>
-                        <span className={`text-sm ${meal.is_completed ? 'text-primary' : 'text-muted-foreground'}`}>
-                          {meal.is_completed ? '✓' : '○'}
-                        </span>
-                      </div>
-                    ))}
-                    <Button variant="outline" className="w-full mt-4" onClick={() => navigate('/meals')}>
-                      View Meal Plan
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground mb-2">No meals planned yet</p>
-                    <Button size="sm" onClick={() => navigate('/meals')}>Generate Meals</Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Recent Workouts Card */}
-            <Card className="col-span-full md:col-span-2">
-              <CardHeader>
-                <CardTitle>Recent Workouts</CardTitle>
-                <CardDescription>Your workout activity</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {recentWorkouts.length > 0 ? (
-                  <div className="space-y-3">
-                    {recentWorkouts.map((log) => (
-                      <div key={log.id} className="flex items-center justify-between border-b pb-2 last:border-0">
+                <button onClick={() => navigate('/meals')} className="text-xs text-primary font-medium flex items-center gap-0.5 hover:underline">
+                  View all <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+              {todayMeals.length > 0 ? (
+                <div className="px-5 pb-4 space-y-2">
+                  {todayMeals.map(meal => (
+                    <div key={meal.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full ${meal.is_completed ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
                         <div>
-                          <p className="font-medium">{log.workouts?.name || 'Workout'}</p>
+                          <p className="text-sm font-medium capitalize">{meal.meal_type}</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-[180px]">{meal.recipe_name}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{meal.calories || '–'} kcal</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-muted-foreground">{completedMeals}/{todayMeals.length} completed</span>
+                    <Progress value={(completedMeals / todayMeals.length) * 100} className="w-24 h-1.5" />
+                  </div>
+                </div>
+              ) : (
+                <div className="px-5 pb-5 text-center">
+                  <p className="text-sm text-muted-foreground mb-3">No meals planned for today</p>
+                  <Button size="sm" onClick={() => navigate('/meals')}>Generate Meal Plan</Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Workouts */}
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-accent/10">
+                    <Dumbbell className="w-4 h-4 text-accent" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Recent Workouts</h3>
+                </div>
+                <button onClick={() => navigate('/workout')} className="text-xs text-primary font-medium flex items-center gap-0.5 hover:underline">
+                  View all <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+              {recentWorkouts.length > 0 ? (
+                <div className="px-5 pb-4 space-y-2">
+                  {recentWorkouts.slice(0, 3).map(log => (
+                    <div key={log.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-accent/10">
+                          <Zap className="w-4 h-4 text-accent" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{log.workouts?.name || 'Workout'}</p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(log.completed_at).toLocaleDateString()}
+                            {new Date(log.completed_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                           </p>
                         </div>
-                        <span className="text-sm text-muted-foreground">
-                          {log.duration_minutes || log.workouts?.duration_minutes} min
-                        </span>
                       </div>
-                    ))}
-                    <Button variant="outline" className="w-full" onClick={() => navigate('/workout')}>
-                      View All Workouts
-                    </Button>
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {log.duration_minutes || log.workouts?.duration_minutes || '–'} min
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-5 pb-5 text-center">
+                  <p className="text-sm text-muted-foreground mb-3">No workouts logged yet</p>
+                  <Button size="sm" variant="outline" onClick={() => navigate('/workout')}>Start Workout</Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Profile Summary + Wearable row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Mini Profile */}
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground font-bold text-lg">
+                    {profile.first_name?.charAt(0)}{profile.last_name?.charAt(0)}
                   </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground mb-2">No workouts logged yet</p>
-                    <Button size="sm" onClick={() => navigate('/workout')}>Start Workout</Button>
+                  <div>
+                    <p className="font-semibold text-sm">{profile.first_name} {profile.last_name}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{profile.activity_level?.replace(/_/g, ' ') || 'Not set'}</p>
                   </div>
-                )}
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <StatBox label="Age" value={profile.age || '–'} />
+                  <StatBox label="Height" value={profile.height_cm ? `${profile.height_cm}cm` : '–'} />
+                  <StatBox label="Weight" value={profile.weight_kg ? `${profile.weight_kg}kg` : '–'} />
+                </div>
               </CardContent>
             </Card>
 
-            {/* Connect Wearable Card */}
-            <Card className="col-span-full">
-              <CardContent className="flex items-center justify-between py-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                    <Watch className="h-6 w-6" />
+            {/* Wearable CTA */}
+            <Card className="group cursor-pointer hover:border-primary/40 transition-colors" onClick={() => navigate('/wearables')}>
+              <CardContent className="p-5 flex flex-col justify-between h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                    <Watch className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold">Connect a Wearable</p>
-                    <p className="text-sm text-muted-foreground">Sync your smartwatch, ring, or fitness band</p>
+                    <p className="font-semibold text-sm">Connect Wearable</p>
+                    <p className="text-xs text-muted-foreground">Smartwatch, ring, or band</p>
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => navigate('/wearables')}>
-                  Connect
-                </Button>
+                <div className="flex items-center gap-1 text-xs text-primary font-medium">
+                  Set up now <ChevronRight className="w-3 h-3" />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -401,5 +277,34 @@ const Dashboard = () => {
     </>
   );
 };
+
+/* ---- Small sub-components ---- */
+
+function MacroPill({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className={`rounded-xl px-2.5 py-2 text-center ${color}`}>
+      <p className="text-xs font-bold">{value}</p>
+      <p className="text-[10px] opacity-70">{label}</p>
+    </div>
+  );
+}
+
+function QuickAction({ icon, label, onClick, color }: { icon: React.ReactNode; label: string; onClick: () => void; color: string }) {
+  return (
+    <button onClick={onClick} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border hover:shadow-md transition-all active:scale-95">
+      <div className={`p-2.5 rounded-xl ${color}`}>{icon}</div>
+      <span className="text-xs font-medium text-foreground">{label}</span>
+    </button>
+  );
+}
+
+function StatBox({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="bg-muted/50 rounded-xl py-2 px-1">
+      <p className="text-sm font-bold text-foreground">{value}</p>
+      <p className="text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
+}
 
 export default Dashboard;
