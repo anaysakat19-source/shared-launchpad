@@ -14,6 +14,7 @@ import Meals from "./pages/Meals";
 import Workout from "./pages/Workout";
 import Progress from "./pages/Progress";
 import Chat from "./pages/Chat";
+import Wearables from "./pages/Wearables";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
