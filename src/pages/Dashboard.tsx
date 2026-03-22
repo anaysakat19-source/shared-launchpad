@@ -376,6 +376,24 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Connect Wearable Card */}
+            <Card className="col-span-full">
+              <CardContent className="flex items-center justify-between py-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <Watch className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Connect a Wearable</p>
+                    <p className="text-sm text-muted-foreground">Sync your smartwatch, ring, or fitness band</p>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={() => navigate('/wearables')}>
+                  Connect
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
