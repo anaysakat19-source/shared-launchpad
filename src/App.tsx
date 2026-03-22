@@ -37,6 +37,7 @@ const App = () => (
           <Route path="/workout" element={<Workout />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/wearables" element={<Wearables />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
