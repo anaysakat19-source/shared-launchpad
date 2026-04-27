@@ -81,6 +81,38 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          created_at: string
+          customer_id: string
+          dietitian_profile_id: string
+          id: string
+          last_message_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          dietitian_profile_id: string
+          id?: string
+          last_message_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          dietitian_profile_id?: string
+          id?: string
+          last_message_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_dietitian_profile_id_fkey"
+            columns: ["dietitian_profile_id"]
+            isOneToOne: false
+            referencedRelation: "dietitian_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dietary_preferences: {
         Row: {
           allergies: string[] | null
@@ -121,6 +153,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      dietitian_profiles: {
+        Row: {
+          bio: string
+          certifications: string[] | null
+          contact_email: string
+          contact_phone: string | null
+          created_at: string
+          education: string
+          full_name: string
+          hourly_rate_inr: number | null
+          id: string
+          is_available: boolean
+          is_demo: boolean
+          languages: string[] | null
+          location: string | null
+          photo_url: string | null
+          rating: number | null
+          specialty: string
+          updated_at: string
+          user_id: string | null
+          website: string | null
+          years_experience: number
+        }
+        Insert: {
+          bio: string
+          certifications?: string[] | null
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string
+          education: string
+          full_name: string
+          hourly_rate_inr?: number | null
+          id?: string
+          is_available?: boolean
+          is_demo?: boolean
+          languages?: string[] | null
+          location?: string | null
+          photo_url?: string | null
+          rating?: number | null
+          specialty: string
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+          years_experience?: number
+        }
+        Update: {
+          bio?: string
+          certifications?: string[] | null
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string
+          education?: string
+          full_name?: string
+          hourly_rate_inr?: number | null
+          id?: string
+          is_available?: boolean
+          is_demo?: boolean
+          languages?: string[] | null
+          location?: string | null
+          photo_url?: string | null
+          rating?: number | null
+          specialty?: string
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+          years_experience?: number
+        }
+        Relationships: []
       }
       health_conditions: {
         Row: {
@@ -247,6 +348,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -504,6 +637,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_conversation_member: {
+        Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
     }
