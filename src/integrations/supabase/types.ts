@@ -514,7 +514,7 @@ export type Database = {
         | "moderately_active"
         | "very_active"
         | "extremely_active"
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "dietitian"
       diet_type: "vegetarian" | "non_vegetarian" | "vegan"
       difficulty_level: "beginner" | "intermediate" | "advanced"
       goal_type: "lose_weight" | "gain_muscle" | "maintain"
@@ -653,7 +653,7 @@ export const Constants = {
         "very_active",
         "extremely_active",
       ],
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "dietitian"],
       diet_type: ["vegetarian", "non_vegetarian", "vegan"],
       difficulty_level: ["beginner", "intermediate", "advanced"],
       goal_type: ["lose_weight", "gain_muscle", "maintain"],
