@@ -15,6 +15,12 @@ import Workout from "./pages/Workout";
 import Progress from "./pages/Progress";
 import Chat from "./pages/Chat";
 import Wearables from "./pages/Wearables";
+import DietitianList from "./pages/dietitians/DietitianList";
+import DietitianDetail from "./pages/dietitians/DietitianDetail";
+import MessagesList from "./pages/messages/MessagesList";
+import ConversationView from "./pages/messages/ConversationView";
+import ExpertAuth from "./pages/expert/ExpertAuth";
+import ExpertDashboard from "./pages/expert/ExpertDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +44,12 @@ const App = () => (
           <Route path="/progress" element={<Progress />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/wearables" element={<Wearables />} />
+          <Route path="/dietitians" element={<DietitianList />} />
+          <Route path="/dietitians/:id" element={<DietitianDetail />} />
+          <Route path="/messages" element={<MessagesList />} />
+          <Route path="/messages/:id" element={<ConversationView />} />
+          <Route path="/expert" element={<ExpertAuth />} />
+          <Route path="/expert/dashboard" element={<ExpertDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

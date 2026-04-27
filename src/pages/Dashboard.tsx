@@ -9,7 +9,7 @@ import BottomNav from "@/components/BottomNav";
 import EditProfileDialog from "@/components/dashboard/EditProfileDialog";
 import {
   Flame, Utensils, Dumbbell, TrendingUp, Watch, ChevronRight,
-  LogOut, Droplets, Zap, Target, MessageCircle, UserRound,
+  LogOut, Droplets, Zap, Target, MessageCircle, UserRound, Stethoscope,
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -144,6 +144,43 @@ const Dashboard = () => {
             <QuickAction icon={<TrendingUp className="w-5 h-5" />} label="Progress" onClick={() => navigate('/progress')} color="bg-secondary/10 text-secondary" />
             <QuickAction icon={<MessageCircle className="w-5 h-5" />} label="AI Chat" onClick={() => navigate('/chat')} color="bg-warning/10 text-warning" />
           </div>
+
+          {/* Dietitian CTA */}
+          <Card
+            className="overflow-hidden cursor-pointer border-0 shadow-md hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/dietitians')}
+          >
+            <CardContent className="p-0">
+              <div className="relative bg-gradient-to-br from-secondary via-secondary to-primary text-primary-foreground p-5">
+                <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10" />
+                <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-white/5" />
+                <div className="relative flex items-center gap-4">
+                  <div className="p-3 rounded-2xl bg-white/15 backdrop-blur">
+                    <Stethoscope className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs uppercase tracking-wider text-primary-foreground/75 font-semibold">
+                      1:1 Guidance
+                    </p>
+                    <h3 className="font-bold text-lg leading-tight">Talk to a Dietitian</h3>
+                    <p className="text-xs text-primary-foreground/85 mt-0.5">
+                      Chat with 8+ certified nutrition experts
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 flex-shrink-0" />
+                </div>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/messages');
+                }}
+                className="w-full px-5 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors flex items-center justify-center gap-1"
+              >
+                <MessageCircle className="w-3.5 h-3.5" /> Open my conversations
+              </button>
+            </CardContent>
+          </Card>
 
           {/* Today's Meals */}
           <Card className="overflow-hidden">
