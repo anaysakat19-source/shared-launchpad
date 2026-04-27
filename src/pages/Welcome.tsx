@@ -25,6 +25,10 @@ const Welcome = () => {
               <Link to="/auth?mode=signin">Sign In</Link>
             </Button>
           </div>
+
+          <Link to="/expert" className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline mt-2">
+            Are you a dietitian or health expert? Join here →
+          </Link>
         </div>
 
         {/* Features Grid */}
