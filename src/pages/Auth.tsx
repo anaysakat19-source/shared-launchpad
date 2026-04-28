@@ -21,27 +21,32 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const routeAfterAuth = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, age, height_cm, weight_kg")
+      .eq("id", userId)
+      .maybeSingle();
+    const onboarded = profile && profile.first_name && profile.age && profile.height_cm && profile.weight_kg;
+    navigate(onboarded ? "/dashboard" : "/onboarding/basic");
+  };
+
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Redirect authenticated users
         if (session?.user) {
-          navigate("/dashboard");
+          setTimeout(() => routeAfterAuth(session.user.id), 0);
         }
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
       if (session?.user) {
-        navigate("/dashboard");
+        routeAfterAuth(session.user.id);
       }
     });
 
@@ -52,7 +57,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    const redirectUrl = `${window.location.origin}/onboarding/basic`;
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -100,7 +105,7 @@ const Auth = () => {
         title: "Welcome back!",
         description: "Signed in successfully.",
       });
-      navigate("/dashboard");
+      // routing handled by onAuthStateChange
     }
   };
 
