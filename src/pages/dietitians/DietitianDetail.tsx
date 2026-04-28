@@ -226,20 +226,27 @@ const DietitianDetail = () => {
             <CardContent className="p-5 space-y-3">
               <h2 className="font-semibold text-sm">Contact</h2>
               <div className="space-y-2 text-sm">
-                <a
-                  href={`mailto:${dietitian.contact_email}`}
-                  className="flex items-center gap-3 text-foreground hover:text-primary"
-                >
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  {dietitian.contact_email}
-                </a>
-                {dietitian.contact_phone && (
+                {contact?.contact_email ? (
                   <a
-                    href={`tel:${dietitian.contact_phone}`}
+                    href={`mailto:${contact.contact_email}`}
+                    className="flex items-center gap-3 text-foreground hover:text-primary"
+                  >
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    {contact.contact_email}
+                  </a>
+                ) : (
+                  <p className="flex items-center gap-3 text-muted-foreground">
+                    <Mail className="w-4 h-4" />
+                    Start a conversation to view contact details
+                  </p>
+                )}
+                {contact?.contact_phone && (
+                  <a
+                    href={`tel:${contact.contact_phone}`}
                     className="flex items-center gap-3 text-foreground hover:text-primary"
                   >
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    {dietitian.contact_phone}
+                    {contact.contact_phone}
                   </a>
                 )}
                 {dietitian.website && (
