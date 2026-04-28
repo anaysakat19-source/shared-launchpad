@@ -22,8 +22,6 @@ type Dietitian = {
   location: string | null;
   bio: string;
   hourly_rate_inr: number | null;
-  contact_email: string;
-  contact_phone: string | null;
   website: string | null;
   rating: number | null;
   is_available: boolean;
@@ -35,6 +33,7 @@ const DietitianDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [dietitian, setDietitian] = useState<Dietitian | null>(null);
+  const [contact, setContact] = useState<{ contact_email: string | null; contact_phone: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -56,7 +55,7 @@ const DietitianDetail = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("dietitian_profiles")
-      .select("*")
+      .select("id, full_name, specialty, years_experience, education, certifications, languages, location, bio, hourly_rate_inr, website, rating, is_available, photo_url")
       .eq("id", id)
       .maybeSingle();
     if (error || !data) {
@@ -65,6 +64,17 @@ const DietitianDetail = () => {
       return;
     }
     setDietitian(data as Dietitian);
+    const { data: contactRows } = await supabase.rpc("get_dietitian_contact", {
+      _dietitian_profile_id: id,
+    });
+    if (contactRows && contactRows.length > 0) {
+      setContact({
+        contact_email: contactRows[0].contact_email,
+        contact_phone: contactRows[0].contact_phone,
+      });
+    } else {
+      setContact(null);
+    }
     setLoading(false);
   };
 
@@ -216,20 +226,27 @@ const DietitianDetail = () => {
             <CardContent className="p-5 space-y-3">
               <h2 className="font-semibold text-sm">Contact</h2>
               <div className="space-y-2 text-sm">
-                <a
-                  href={`mailto:${dietitian.contact_email}`}
-                  className="flex items-center gap-3 text-foreground hover:text-primary"
-                >
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  {dietitian.contact_email}
-                </a>
-                {dietitian.contact_phone && (
+                {contact?.contact_email ? (
                   <a
-                    href={`tel:${dietitian.contact_phone}`}
+                    href={`mailto:${contact.contact_email}`}
+                    className="flex items-center gap-3 text-foreground hover:text-primary"
+                  >
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    {contact.contact_email}
+                  </a>
+                ) : (
+                  <p className="flex items-center gap-3 text-muted-foreground">
+                    <Mail className="w-4 h-4" />
+                    Start a conversation to view contact details
+                  </p>
+                )}
+                {contact?.contact_phone && (
+                  <a
+                    href={`tel:${contact.contact_phone}`}
                     className="flex items-center gap-3 text-foreground hover:text-primary"
                   >
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    {dietitian.contact_phone}
+                    {contact.contact_phone}
                   </a>
                 )}
                 {dietitian.website && (
