@@ -22,8 +22,6 @@ type Dietitian = {
   location: string | null;
   bio: string;
   hourly_rate_inr: number | null;
-  contact_email: string;
-  contact_phone: string | null;
   website: string | null;
   rating: number | null;
   is_available: boolean;
@@ -35,6 +33,7 @@ const DietitianDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [dietitian, setDietitian] = useState<Dietitian | null>(null);
+  const [contact, setContact] = useState<{ contact_email: string | null; contact_phone: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -56,7 +55,7 @@ const DietitianDetail = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("dietitian_profiles")
-      .select("*")
+      .select("id, full_name, specialty, years_experience, education, certifications, languages, location, bio, hourly_rate_inr, website, rating, is_available, photo_url")
       .eq("id", id)
       .maybeSingle();
     if (error || !data) {
@@ -65,6 +64,17 @@ const DietitianDetail = () => {
       return;
     }
     setDietitian(data as Dietitian);
+    const { data: contactRows } = await supabase.rpc("get_dietitian_contact", {
+      _dietitian_profile_id: id,
+    });
+    if (contactRows && contactRows.length > 0) {
+      setContact({
+        contact_email: contactRows[0].contact_email,
+        contact_phone: contactRows[0].contact_phone,
+      });
+    } else {
+      setContact(null);
+    }
     setLoading(false);
   };
 
