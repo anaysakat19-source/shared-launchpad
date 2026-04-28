@@ -632,6 +632,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_dietitian_contact: {
+        Args: { _dietitian_profile_id: string }
+        Returns: {
+          contact_email: string
+          contact_phone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
