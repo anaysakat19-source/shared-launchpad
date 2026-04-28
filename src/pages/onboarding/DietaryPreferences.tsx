@@ -234,6 +234,9 @@ const DietaryPreferences = () => {
                 <Button type="button" variant="outline" onClick={() => navigate("/onboarding/health")} className="flex-1">
                   Back
                 </Button>
+                <Button type="button" variant="ghost" onClick={() => navigate("/dashboard")} className="flex-1" disabled={loading}>
+                  Skip
+                </Button>
                 <Button type="submit" className="flex-1" disabled={loading}>
                   {loading ? "Completing..." : "Complete Setup"}
                 </Button>
