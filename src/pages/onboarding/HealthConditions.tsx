@@ -151,6 +151,9 @@ const HealthConditions = () => {
               <Button type="button" variant="outline" onClick={() => navigate("/onboarding/goals")} className="flex-1">
                 Back
               </Button>
+              <Button type="button" variant="ghost" onClick={() => navigate("/onboarding/diet")} className="flex-1">
+                Skip
+              </Button>
               <Button type="submit" className="flex-1" disabled={loading}>
                 {loading ? "Saving..." : "Next"}
               </Button>

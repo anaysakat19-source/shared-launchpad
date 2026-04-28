@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  lastName: z.string().optional(),
   age: z.coerce.number().min(13, "Must be at least 13 years old").max(120),
   gender: z.enum(["male", "female", "other"]),
   heightCm: z.coerce.number().min(100, "Height must be at least 100cm").max(250),
@@ -113,7 +113,7 @@ const BasicInfo = () => {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel>Last Name (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="Doe" {...field} />
                       </FormControl>

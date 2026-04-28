@@ -216,6 +216,9 @@ const Goals = () => {
                 <Button type="button" variant="outline" onClick={() => navigate("/onboarding/basic")} className="flex-1">
                   Back
                 </Button>
+                <Button type="button" variant="ghost" onClick={() => navigate("/onboarding/health")} className="flex-1">
+                  Skip
+                </Button>
                 <Button type="submit" className="flex-1" disabled={loading}>
                   {loading ? "Saving..." : "Next"}
                 </Button>
